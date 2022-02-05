@@ -42,7 +42,7 @@ def phys(timeseries): # Kurtosis of the distribution
 def main():
     file = 'data/timeseries.dat'
     timeseries = np.loadtxt(file)
-    print(timeseires.shape) # (10000,)
+    print(timeseries.shape) # (10000,)
     print(timeseries)
 
     alpha = 0.68
