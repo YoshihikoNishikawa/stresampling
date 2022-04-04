@@ -1,6 +1,6 @@
 #
 #   Copyright (c) 2022, Yoshihiko Nishikawa, Jun Takahashi, and Takashi Takahashi
-#   Date: * Jan. 2022
+#   Date: Apr. 2022
 #
 #   Python3 package for statistical analysis of stationary timeseries using the stationary bootstrap method [D. N. Politis and J. P. Romano (1994)]
 #   with estimating an optimal parameter [D. N. Politis and H. White (2004)][A. Patton, D. N. Politis, and H. White (2009)].
@@ -50,7 +50,7 @@ def conf_int(trajectory, phys, alpha, number_bsamples=1000, *, parallel=True, me
         number_bsamples: the number of bootstrap samples
         alpha: confidence level in [0.0, 1.0]
         parallel: parallelization flag
-        method: {'percentile', 'bt', 'bca'}, default='percentile'.
+        method: {'percentile', 'bt', 'symbt', 'bca'}, default='percentile'.
         Used to specify the method to compute the confidence interval.
 
     Returns:
@@ -76,21 +76,25 @@ def conf_int(trajectory, phys, alpha, number_bsamples=1000, *, parallel=True, me
         list_phys = output_bootstrap_samples(
             output.prob, trajectory, phys, number_bsamples)
 
-    output.mean = 2.0 * phys(trajectory) - np.mean(list_phys)
+    simple_mean = phys(trajectory)
+    output.mean = simple_mean
     output.se = np.sqrt(
         number_bsamples * np.var(list_phys) / (number_bsamples - 1))
     output.dist = list_phys
 
     if method == 'percentile':
-        output.low, output.up = percentile_conf_interval(
-            list_phys, alpha, number_bsamples)
+        output.low, output.up = percentile(
+            list_phys, alpha)
     elif method == 'bt':
-        output.low, output.up = lazy_Bootstrap_t(
-            list_phys, alpha, number_bsamples)
-    elif method == 'bca':
-        output.low, output.up = lazy_BCa(
-            list_phys, alpha, number_bsamples)
+        output.low, output.up = Bootstrap_t(
+            list_phys, alpha, simple_mean)
+    elif method == 'symbt':
+        output.low, output.up = sym_Bootstrap_t(
+            list_phys, alpha, simple_mean)
+    elif method == 'bc':
+        output.low, output.up = bias_corrected(
+            list_phys, alpha, simple_mean)
     else:
-        print('Error, choose one of percentile, bt (bootstrap-t), or bca (bias-corrected and accelerated) methods.')
+        print('Error, choose one of percentile, bt (bootstrap-t), symbt (symmetric bootstrap-t), or bc (bias-corrected) methods.')
 
     return output

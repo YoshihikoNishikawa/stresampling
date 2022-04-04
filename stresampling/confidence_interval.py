@@ -1,6 +1,6 @@
 #
 #   Copyright (c) 2022, Yoshihiko Nishikawa, Jun Takahashi, and Takashi Takahashi
-#   Date: * Jan. 2022
+#   Date: Apr. 2022
 #
 #   Python3 package for statistical analysis of stationary timeseries using the stationary bootstrap method [D. N. Politis and J. P. Romano (1994)]
 #   with estimating an optimal parameter [D. N. Politis and H. White (2004)][A. Patton, D. N. Politis, and H. White (2009)].
@@ -15,7 +15,7 @@ import numpy as np
 from scipy.stats import norm
 
 
-def percentile_conf_interval(list_observable, alpha, number_bsamples):
+def percentile(list_observable, alpha):
     """
     The bootstrap percentile method for estimating 100*alpha % confidence interval
 
@@ -27,27 +27,22 @@ def percentile_conf_interval(list_observable, alpha, number_bsamples):
         The lower and upper limits of the estimated 100*alpha % confidence interval
     """
 
-    list_observable.sort()
     gap = 0.5 * (1.0 - alpha)
-    low_index = int(number_bsamples * gap)
-    up_index = int(number_bsamples * (1.0 - gap))
-    return list_observable[low_index], list_observable[up_index]
+    return np.quantile(list_observable, gap), np.quantile(list_observable, 1.0 - gap) 
 
 
-def lazy_BCa(list_observable, alpha, number_bsamples):
+def bias_corrected(list_observable, alpha, mean):
     """
-    The bias-corrected and accelerated (BC_a) method with no acceleration for estimating the confidence interval,
+    The bias-corrected (BC) method for estimating the confidence interval,
     see [T. J. Diccio and B. Efron (1996)]
 
     Args:
         list_observable: A list of bootstrap samples
         alpha: The value for the confidence
-
+        mean: The empirical mean value
     Return:
         The lower and upper limits of the estimated 100*alpha % confidence interval
     """
-    list_observable.sort()
-    mean = np.mean(list_observable)
     hatalpha0 = np.count_nonzero(
         list_observable <= mean) / len(list_observable)
     hatz0 = norm.ppf(hatalpha0)
@@ -58,12 +53,10 @@ def lazy_BCa(list_observable, alpha, number_bsamples):
                           (1.0 - acceleration * (hatz0 + norm.ppf(gap))))
     u_hatalpha = norm.cdf(hatz0 + (hatz0 + norm.ppf(1.0 - gap)) /
                           (1.0 - acceleration * (hatz0 + norm.ppf(1.0 - gap))))
-    low_index = int(number_bsamples * l_hatalpha)
-    up_index = int(number_bsamples * u_hatalpha)
-    return list_observable[low_index], list_observable[up_index]
+    return np.quantile(list_observable, l_hatalpha), np.quantile(list_observable, u_hatalpha) 
 
 
-def lazy_Bootstrap_t(list_observable, alpha, number_bsamples):
+def Bootstrap_t(list_observable, alpha, mean):
     """
     The bootstrap-t method for estimating the confidence interval, with an assumption the standard error
     does not depend on bootstrap samples, see [Gotze and Kunsch (1991)][J. P. Romano and M. Wolf (2006)],
@@ -72,20 +65,26 @@ def lazy_Bootstrap_t(list_observable, alpha, number_bsamples):
     Args:
         list_observable: A list of bootstrap samples
         alpha: The value for the confidence
-
+        mean: The empirical mean value
     Return:
         The lower and upper limits of the estimated 100*alpha % confidence interval
     """
-    list_observable.sort()
-    sigma = np.sqrt(np.var(list_observable) / (number_bsamples - 1))
-    mean = np.mean(list_observable)
-    bmean = np.full(number_bsamples, mean)
-    list_t = (list_observable - bmean) / sigma
-    list_t.sort()
     gap = 0.5 * (1.0 - alpha)
-    low_index = int(number_bsamples * gap)
-    up_index = int(number_bsamples * (1.0 - gap))
-    low_t = list_t[low_index]
-    up_t = list_t[up_index]
+    return 2.0 * mean - np.quantile(list_observable, 1.0 - gap), 2.0 * mean - np.quantile(list_observable, gap)
 
-    return mean + sigma * low_t, mean + sigma * up_t
+
+def sym_Bootstrap_t(list_observable, alpha, mean):
+    """
+    The symmetric bootstrap-t method for estimating the confidence interval, with an assumption the standard error
+    does not depend on bootstrap samples, see [P. Hall (1988)] and [J. P. Romano and M. Wolf (2006)].
+
+    Args:
+        list_observable: A list of bootstrap samples
+        alpha: The value for the confidence
+        mean: The empirical mean value
+    Return:
+        The lower and upper limits of the estimated 100*alpha % confidence interval
+    """
+    list_t = np.abs(list_observable - mean)
+    quantile = np.quantile(list_t, alpha)
+    return mean - quantile, mean + quantile

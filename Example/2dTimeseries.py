@@ -1,6 +1,6 @@
 #
 #   Copyright (c) 2022, Yoshihiko Nishikawa, Jun Takahashi, and Takashi Takahashi
-#   Date: * Jan. 2022
+#   Date: Apr. 2022
 #
 #   Python3 code for autoregressive models with a finite order.
 #   The statistics of the covariance between two indep. timeseries is calculated with the stationary bootstrap method [D. N. Politis and J. P. Romano (1994)]
@@ -15,7 +15,6 @@
 
 import numpy as np
 from stresampling import stationary_bootstrap as sbm
-import math
 
 np.random.seed(100)  # Fixed seed for PRNG
 

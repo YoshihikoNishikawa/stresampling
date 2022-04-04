@@ -88,7 +88,7 @@ stresampling.stationary_bootstrap.conf_int(<i>seq</i>, <i>phys</i>, <i>alpha</i>
 
         The default is True
 
-    - `method`: {'percentile', 'bt', 'bca'}, *optional*
+    - `method`: {'percentile', 'bt', 'symbt', 'bc'}, *optional*
 
         Specify which method will be used to estimate the confidence limits
 
@@ -96,7 +96,8 @@ stresampling.stationary_bootstrap.conf_int(<i>seq</i>, <i>phys</i>, <i>alpha</i>
 
         - 'percentile': [the bootstrap percentile method](https://www.taylorfrancis.com/books/mono/10.1201/9780429246593/)
         - 'bt': [the bootstrap-t method](https://projecteuclid.org/journals/annals-of-statistics/volume-24/issue-5/Second-order-correctness-of-the-blockwise-bootstrap-for-stationary-observations/10.1214/aos/1069362303.full)
-        - 'bca': [the bias-corrected method](https://projecteuclid.org/journals/statistical-science/volume-11/issue-3/Bootstrap-confidence-intervals/10.1214/ss/1032280214.full). Note that no acceleration is used in this package.
+        - 'symbt': [the symmetric bootstrap-t method](https://www.tandfonline.com/doi/abs/10.1080/10485250600687812)
+        - 'bc': [the bias-corrected method](https://projecteuclid.org/journals/statistical-science/volume-11/issue-3/Bootstrap-confidence-intervals/10.1214/ss/1032280214.full). Note that no acceleration is used in this package.
 
 - Return: Stat: a class including
     - `mean`: The estimate of the quantity

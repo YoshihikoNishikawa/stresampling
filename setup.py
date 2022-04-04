@@ -6,7 +6,7 @@ with open('README.md', 'r') as file:
 
 setup_args = dict(
     name='stresampling',
-    version="1.0.1",
+    version="1.0.2",
     packages=['stresampling'],
     description="Python package for statistical analysis of time series using resampling methods",
     long_description=README,
@@ -24,7 +24,7 @@ setup_args = dict(
         'Topic :: Scientific/Engineering :: Physics',
         'Topic :: Scientific/Engineering :: Chemistry',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
-        'Programming Language :: Python :: 3 :: Only'
+        'Programming Language :: Python :: 3.6'
     ]
 )
 
